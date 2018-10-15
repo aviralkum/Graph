@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script type="text/javascript" src="http://mbostock.github.com/d3/d3.js"></script>
+</head>
+<style>
+
+	.node {
+		cursor: pointer;
+	}
+
+	.node circle {
+	  fill: #fff;
+	  stroke: steelblue;
+	  stroke-width: 3px;
+	}
+
+	.node text {
+	  font: 12px sans-serif;
+	}
+
+	.link {
+	  fill: none;
+	  stroke: #ccc;
+	  stroke-width: 2px;
+	}
+
+  .label {
+    padding: 0;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 400;
+    font-family: sans-serif;
+  }
+
+  .inp {
+    width: 150px;
+    height: 25px;
+    border: 1px solid;
+    border-radius: 3px;
+    font-size: 14px;
+  }
+
+  .butt {
+    width: 90px;
+    height: 30px;
+    border-radius: 4px;
+    background-color: #2E86C1;
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    margin-top: 3px;
+  }
+
+  .header {
+    height: 50px;
+    width: 100%;
+    background-color: #2E86C1;
+    text-align: center;
+    font-size: 23px;
+    color: white;
+    padding-top: 20px;
+  }
+
+  .replace {
+    margin-top: 1.5%;
+
+  }
+
+</style>
+
+<body>
+
+  <div class="header">
+      Street Context Model
+  </div>
+
+  <!-- Download test code  -->
+
+  <div class="replace">
+    <span class="label">Please input an existing and new value </span>
+    <br/>
+    <span class="label">Existng Value:</span><br>
+    <input class="inp" type="text" id="Old" name="Existng Value" value="Animal">
+    <br>
+    <span class="label">New Value:</span><br>
+    <input class="inp" type="text" id="New" name="New" value="">
+    <br>
+    <button class="butt" type="button" onclick="change()">Replace</button>
+    <button class="butt" type="button" onclick="reset()">Reset</button>
+    <button class="butt" id="dwn-btn" value="Download dinamically generated text file">Download</button>
+  </div>
+
+  <!-- load the d3.js library -->
+<script src="http://d3js.org/d3.v3.min.js"></script>
+
+<script>
+
+var treeData = JSON.parse(localStorage.getItem("load"));
+var treeData2 = [
+{
+  "name": "Street",
+  "parent": "nul",
+  "children": [
+    {
+      "name": "NonLivingObject",
+      "parent": "Street",
+      "children": [
+        {
+          "name": "Architecture",
+          "parent": "NonLivingObject",
+          "children": [
+            {
+              "name":"Building",
+              "parent":"Architecture"
+            },
+            {
+              "name":"Apartment",
+              "parent":"Architecture"
+            },
+            {
+              "name":"Shop",
+              "parent":"Architecture"
+            },
+            {
+              "name":"House",
+              "parent":"Architecture"
+            },
+            {
+              "name":"Hotel",
+              "parent":"Architecture"
+            }
+          ]
+
+        },
+        {
+          "name": "Furniture",
+          "parent": "NonLivingObject",
+          "children": [
+            {
+              "name":"Chair",
+              "parent":"NonLivingObject"
+            },
+            {
+              "name":"Table",
+              "parent":"NonLivingObject"
+            }
+
+          ]
+        },
+        {
+          "name": "Vehicle",
+          "parent": "NonLivingObject",
+          "children": [
+            {
+              "name":"Car",
+              "parent":"Vehicle"
+            },
+            {
+              "name":"Bike",
+              "parent":"Vehicle"
+            },
+            {
+              "name":"Bus",
+              "parent":"Vehicle"
+            },
+            {
+              "name":"Truck",
+              "parent":"Vehicle"
+            }
+
+
+          ]
+        },
+        {
+          "name": "Light",
+          "parent": "NonLivingObject",
+          "children": [
+            {
+              "name":"StreetLight",
+              "parent":"Light"
+            },
+            {
+              "name":"TrafficLight",
+              "parent":"Light"
+            },
+            {
+              "name":"Lamp",
+              "parent":"Light"
+            }
+
+          ]
+
+        },
+        {
+          "name": "Road",
+          "parent": "NonLivingObject",
+          "children": [
+            {
+              "name":"Freeway",
+              "parent":"Road"
+            },
+            {
+              "name":"Alley",
+              "parent":"Road"
+            },
+            {
+              "name":"SingleLane",
+              "parent":"Road"
+            }
+
+          ]
+        }
+      ]
+    },
+    // Level
+    {
+      "name": "LivingObject",
+      "parent": "Street",
+      "children": [
+        {
+          "name": "Animal",
+          "parent": "LivingObject",
+          "children": [
+            {
+              "name":"Dog",
+              "parent":"Animal"
+            },
+            {
+              "name":"Cat",
+              "parent":"Animal"
+            },
+            {
+              "name":"Bird",
+              "parent":"Animal"
+            },
+            {
+              "name":"Insects",
+              "parent":"Animal"
+            }
+
+          ]
+        },
+        {
+          "name": "Human",
+          "parent": "LivingObject",
+          "children": [
+            {
+              "name":"Man",
+              "parent":"Human"
+            },
+            {
+              "name":"Woman",
+              "parent":"Human"
+            }
+
+          ]
+        },
+        {
+          "name": "Tree",
+          "parent": "LivingObject",
+          "children": [
+            {
+              "name":"RedWood",
+              "parent":"Tree"
+            },
+            {
+              "name":"Evergreen",
+              "parent":"Tree"
+            },
+            {
+              "name":"Decidous",
+              "parent":"Tree"
+            }
+
+          ]
+        }
+
+      ]
+    }
+  ]
+}
+];
+
+
+
+var test_string;
+//console.log("Tree ata" + JSON.stringify(treeData[0]));
+
+
+var test = JSON.stringify(treeData); // contains the treeData in string format
+
+if(localStorage.length>0){
+for (var i = 0; i < localStorage.length; i++) {
+
+  var key = localStorage.key(i);
+  var val = localStorage.getItem(key);
+  test_string = test.replace(key,val);
+  test = test_string;
+//  console.log("key is:"+key);
+//  console.log("value is:"+val);
+
+  //console.log("value in local storage is":+test_string);
+}
+}
+ // test_string contains the latest string that has been replaced
+
+// Testing code
+
+
+    //Do something
+
+
+
+var objec = JSON.parse(test_string);
+
+treeData = objec;
+
+// Store the tree in localStorage
+
+localStorage.setItem("load",JSON.stringify(treeData));
+
+var filename;
+// Downloading the file
+
+<!-- download code -->
+function download(filename, text) {
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', filename);
+
+    element.style.display = 'none';
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
+}
+
+// Start file download.
+document.getElementById("dwn-btn").addEventListener("click", function(){
+    // Generate download of hello.txt file with some content
+//    var text = document.getElementById("text-val").value;
+
+
+    download("Graph", test);
+}, false);
+
+<!-- download code -->
+
+
+
+// ************** Generate the tree diagram	 *****************
+var margin = {top: 20, right: 120, bottom: 20, left: 120},
+width = 960 - margin.right - margin.left,
+height = 500 - margin.top - margin.bottom;
+
+var i = 0,
+duration = 750,
+root;
+
+var tree = d3.layout.tree()
+.size([height, width]);
+
+var diagonal = d3.svg.diagonal()
+.projection(function(d) { return [d.y, d.x]; });
+
+var svg = d3.select("body").append("svg")
+.attr("width", width + margin.right + margin.left)
+.attr("height", height + margin.top + margin.bottom)
+.append("g")
+.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+root = treeData[0];
+root.x0 = height / 2;
+root.y0 = 0;
+
+update(root);
+
+d3.select(self.frameElement).style("height", "500px");
+
+function update(source) {
+
+// Compute the new tree layout.
+console.log(source)
+var nodes = tree.nodes(root).reverse(),
+  links = tree.links(nodes);
+
+// Normalize for fixed-depth.
+nodes.forEach(function(d) { d.y = d.depth * 180; });
+
+// Update the nodes…
+var node = svg.selectAll("g.node")
+  .data(nodes, function(d) { return d.id || (d.id = ++i); });
+
+// Enter any new nodes at the parent's previous position.
+var nodeEnter = node.enter().append("g")
+  .attr("class", "node")
+  .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
+  .on("click", click);
+
+nodeEnter.append("circle")
+  .attr("r", 1e-6)
+  .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+
+nodeEnter.append("text")
+  .attr("x", function(d) { return d.children || d._children ? -13 : 13; })
+  .attr("dy", ".35em")
+  .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+  .text(function(d) { return d.name; })
+  .style("fill-opacity", 1e-6);
+
+// Transition nodes to their new position.
+var nodeUpdate = node.transition()
+  .duration(duration)
+  .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
+
+nodeUpdate.select("circle")
+  .attr("r", 10)
+  .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+
+nodeUpdate.select("text")
+  .style("fill-opacity", 1);
+
+// Transition exiting nodes to the parent's new position.
+var nodeExit = node.exit().transition()
+  .duration(duration)
+  .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
+  .remove();
+
+nodeExit.select("circle")
+  .attr("r", 1e-6);
+
+nodeExit.select("text")
+  .style("fill-opacity", 1e-6);
+
+// Update the links…
+var link = svg.selectAll("path.link")
+  .data(links, function(d) { return d.target.id; });
+
+// Enter any new links at the parent's previous position.
+link.enter().insert("path", "g")
+  .attr("class", "link")
+  .attr("d", function(d) {
+  var o = {x: source.x0, y: source.y0};
+  return diagonal({source: o, target: o});
+  });
+
+// Transition links to their new position.
+link.transition()
+  .duration(duration)
+  .attr("d", diagonal);
+
+// Transition exiting nodes to the parent's new position.
+link.exit().transition()
+  .duration(duration)
+  .attr("d", function(d) {
+  var o = {x: source.x, y: source.y};
+  return diagonal({source: o, target: o});
+  })
+  .remove();
+
+// Stash the old positions for transition.
+nodes.forEach(function(d) {
+d.x0 = d.x;
+d.y0 = d.y;
+});
+}
+
+// Toggle children on click.
+function click(d) {
+  console.log("Inside Click")
+if (d.children) {
+d._children = d.children;
+d.children = null;
+} else {
+d.children = d._children;
+d._children = null;
+}
+update(d);
+}
+function change() {
+
+    console.log("inside change function");
+    var value = document.getElementById('New').value; // Captures the new value
+    var old_value = document.getElementById('Old').value; // captures the old value
+
+    // Check if old_value exists in the tree in localStorage
+
+    var str = localStorage.getItem("load");
+    var pos = str.indexOf(old_value);
+    var post = str.search(old_value);
+    console.log("VAlue after ae:"+post);
+
+  if(post>=0)
+  {
+  localStorage.setItem(old_value,value);
+
+//  localStorage['test'] = JSON.stringify(dict); // store the current map in test
+
+// print the values currentyl stored in the map
+  console.log(localStorage.length);
+for (var i = 0; i < localStorage.length; i++) {
+
+  var key = localStorage.key(i);
+
+  var val = localStorage.getItem(localStorage.key(i));
+
+//  console.log(val);
+//console.log("value in local storage is":+test_string);
+
+location.reload();
+}
+}
+
+else {
+
+  alert("Not Found");
+}
+
+}
+
+function reset() {
+   document.getElementById('New').value = ""; // Captures the new value
+   document.getElementById('Old').value = ""; // captures the old va
+}
+function getFile(event) {
+  console.log("Inside getFile");
+	//const input = event.targe
+  const input = document.getElementById("input-file");
+  if ('files' in input && input.files.length > 0) {
+	  placeFileContent(
+      document.getElementById('content-target'),
+      input.files[0])
+  }
+}
+
+function placeFileContent(target, file) {
+	readFileContent(file).then(content => {
+  	target.value = content
+  }).catch(error => console.log(error))
+}
+
+function readFileContent(file) {
+	const reader = new FileReader()
+  return new Promise((resolve, reject) => {
+    reader.onload = event => resolve(event.target.result)
+    reader.onerror = error => reject(error)
+    reader.readAsText(file)
+  })
+}
+
+
+</script>
+
+<div>
+ <label for="input-file">Specify a file:</label><br>
+ <input type="file" onchange="getFile()" id="input-file">
+</div>
+
+<textarea id="content-target"></textarea>
+</body>
+</html>
